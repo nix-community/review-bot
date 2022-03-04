@@ -1,11 +1,9 @@
 import {
-    AutojoinRoomsMixin, ICryptoStorageProvider,
-    LogLevel,
+    AutojoinRoomsMixin, LogLevel,
     LogService,
     MatrixClient,
     PantalaimonClient,
-    RichConsoleLogger, RustSdkCryptoStorageProvider,
-    SimpleFsStorageProvider
+    RichConsoleLogger, SimpleFsStorageProvider
 } from "matrix-bot-sdk";
 import * as path from "path";
 import config from "./config";
@@ -17,9 +15,6 @@ LogService.setLogger(new RichConsoleLogger());
 // For now let's also make sure to log everything (for debugging)
 LogService.setLevel(LogLevel.DEBUG);
 
-// Also let's mute Metrics, so we don't get *too* much noise
-LogService.muteModule("Metrics");
-
 // Print something so we know the bot is working
 LogService.info("index", "Bot starting...");
 
@@ -29,14 +24,8 @@ LogService.info("index", "Bot starting...");
     // Prepare the storage system for the bot
     const storage = new SimpleFsStorageProvider(path.join(config.dataPath, "bot.json"));
 
-    // Prepare a crypto store if we need that
-    let cryptoStore: ICryptoStorageProvider;
-    if (config.encryption) {
-        cryptoStore = new RustSdkCryptoStorageProvider(path.join(config.dataPath, "encrypted"));
-    }
-
     // Now create the client
-    const client = new MatrixClient(config.homeserverUrl, config.accessToken, storage, cryptoStore);
+    const client = new MatrixClient(config.homeserverUrl, config.accessToken, storage);
 
     // Setup the autojoin mixin (if enabled)
     if (config.autoJoin) {

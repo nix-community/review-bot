@@ -4,7 +4,7 @@ import * as htmlEscape from "escape-html";
 
 // The prefix required to trigger the bot. The bot will also respond
 // to being pinged directly.
-export const COMMAND_PREFIX = "!bot";
+export const COMMAND_PREFIX = "review!";
 
 // This is where all of our commands will be handled
 export default class CommandHandler {
