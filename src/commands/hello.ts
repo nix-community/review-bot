@@ -17,7 +17,7 @@ export async function runHelloCommand(roomId: string, event: MessageEvent<Messag
     }
 
     // Now send that message as a notice
-    return client.sendMessage(roomId, {
+    await client.sendMessage(roomId, {
         body: text,
         msgtype: "m.notice",
         format: "org.matrix.custom.html",

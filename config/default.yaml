@@ -12,6 +12,11 @@ autoJoin: true
 # Location on disk for where to store various bot information.
 dataPath: "storage"
 
-# Set to false to disable encryption support. Encrypted data will be
-# stored under dataPath.
-encryption: true
+nixpkgsRepo:
+  { owner: "nixos", repo: "nixpkgs", localPath: "/home/ckie/git/nixpkgs" }
+
+termbinAddress: "termbin.com:9999"
+
+# Personal Access Token
+# https://github.com/settings/tokens
+githubTokenFile: "/path/to/github-token"

@@ -1,6 +1,7 @@
-import { LogService, MatrixClient, MessageEvent, RichReply, UserID } from "matrix-bot-sdk";
+import { LogService, MatrixClient, MessageEvent, MessageEventContent, RichReply, UserID } from "matrix-bot-sdk";
 import { runHelloCommand } from "./hello";
 import * as htmlEscape from "escape-html";
+import { runPrCommand } from "./pr";
 
 // The prefix required to trigger the bot. The bot will also respond
 // to being pinged directly.
@@ -54,17 +55,25 @@ export default class CommandHandler {
         // Check to see what the arguments were to the command
         const args = event.textBody.substring(prefixUsed.length).trim().split(' ');
 
+        const commandFnTable:
+            { [index: string]: (roomId: string, event: MessageEvent<MessageEventContent>, args: string[], client: MatrixClient) => Promise<void>; }
+            = {
+            hello: runHelloCommand,
+            pr: runPrCommand
+        };
+
         // Try and figure out what command the user ran, defaulting to help
         try {
-            if (args[0] === "hello") {
-                return runHelloCommand(roomId, event, args, this.client);
+            if (commandFnTable[args[0]]) {
+                return commandFnTable[args[0]](roomId, event, args, this.client);
             } else {
-                const help = "" +
-                    "!bot hello [user]     - Say hello to a user.\n" +
-                    "!bot help             - This menu\n";
+                const help = `
+${COMMAND_PREFIX}hello [user]     - Say hello to a user.
+${COMMAND_PREFIX}pr [PRs...]      - Run nixpkgs-review on PRs
+${COMMAND_PREFIX}help             - This menu\n`;
 
-                const text = `Help menu:\n${help}`;
-                const html = `<b>Help menu:</b><br /><pre><code>${htmlEscape(help)}</code></pre>`;
+                const text = `Help menu:${help}`;
+                const html = `<b>Help menu:</b><br /><pre><code>${htmlEscape(help.trimStart())}</code></pre>`;
                 const reply = RichReply.createFor(roomId, ev, text, html); // Note that we're using the raw event, not the parsed one!
                 reply["msgtype"] = "m.notice"; // Bots should always use notices
                 return this.client.sendMessage(roomId, reply);
@@ -74,7 +83,7 @@ export default class CommandHandler {
             LogService.error("CommandHandler", e);
 
             // Tell the user there was a problem
-            const message = "There was an error processing your command";
+            const message = `There was an error processing your command${e ? ": " + e.message : ""}.`;
             return this.client.replyNotice(roomId, ev, message);
         }
     }
