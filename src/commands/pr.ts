@@ -49,8 +49,8 @@ ${prInfoText}`,
 
 
 async function runNixpkgsReview(pr: number, githubToken: string) {
-    const nprBin = await findBinariesInPath("nixpkgs-review")[0];
-    const gitBin = await findBinariesInPath("git")[0];
+    const nprBin = (await findBinariesInPath("nixpkgs-review"))[0];
+    const gitBin = (await findBinariesInPath("git"))[0];
 
     const child = spawn(`${gitBin} config user.email review-bot@example.com && ${gitBin} config user.name review-bot && ${nprBin} pr --no-shell --sandbox --post-result ${pr}`,
         {

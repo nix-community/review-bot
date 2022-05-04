@@ -21,6 +21,7 @@
           yarn = nyarn;
         };
         npr = nixpkgs-review.packages.${system}.nixpkgs-review-sandbox;
+        runtimeDeps = [ npr pkgs.git ];
       in rec {
         packages = rec {
           review-bot = y2n.mkYarnPackage {
@@ -33,7 +34,7 @@
             nativeBuildInputs = with pkgs; [ makeWrapper ];
             postFixup = ''
               wrapProgram $out/bin/review-bot --prefix PATH : ${
-                lib.makeBinPath [ npr ]
+                lib.makeBinPath runtimeDeps
               }
             '';
           };
@@ -85,7 +86,8 @@
 
         defaultApp = apps.default;
 
-        devShell =
-          pkgs.mkShell { buildInputs = with pkgs; [ yarn node y2n.yarn2nix npr ]; };
+        devShell = pkgs.mkShell {
+          buildInputs = with pkgs; [ yarn node y2n.yarn2nix ] ++ runtimeDeps;
+        };
       });
 }
