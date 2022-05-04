@@ -7,9 +7,8 @@ import { join } from "path";
 import { createConnection as connectTcp } from "net";
 
 export async function runPrCommand(roomId: string, event: MessageEvent<MessageEventContent>, args: string[], client: MatrixClient) {
-    const githubToken = (await fs.readFile(config.githubTokenFile, "utf-8")).toString().trim();
     const octokit = new Octokit({
-        auth: githubToken,
+        auth: config.githubToken,
         userAgent: "review-bot (https://github.com/nix-community/review-bot)"
     });
     LogService.debug("PrCommand", `I am logged in as ${(await octokit.rest.users.getAuthenticated()).data.login} on GitHub`);
@@ -39,7 +38,7 @@ ${prInfoText}`,
     });
 
     const builds = prInfo.map(async info => {
-        const output = await runNixpkgsReview(info.number, githubToken);
+        const output = await runNixpkgsReview(info.number, config.githubToken);
         const url = await postOnTermbin(output);
         await client.sendMessage(roomId, {
             body: `${mention.text}: build of PR ${info.number} done: ${url}`,

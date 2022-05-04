@@ -4,7 +4,7 @@ homeserverUrl: "https://matrix.org"
 
 # An access token for the bot to use. Learn how to get an access token
 # at https://t2bot.io/docs/access_tokens
-accessToken: "YOUR_TOKEN_HERE"
+accessToken: "YOUR_MTX_TOKEN_HERE"
 
 # Whether or not to autojoin rooms when invited.
 autoJoin: true
@@ -19,4 +19,4 @@ termbinAddress: "termbin.com:9999"
 
 # Personal Access Token
 # https://github.com/settings/tokens
-githubTokenFile: "/path/to/github-token"
+githubToken: "ghp_blahlblahlb"
