@@ -5,10 +5,12 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/turt2live/matrix-bot-sdk-bot-template#readme",
   "main": "lib/index.js",
+  "bin": "lib/index.js",
   "scripts": {
     "start": "ts-node src",
     "lint": "tslint --project ./tsconfig.json -t stylish",
-    "start:dev": "npm run build && node lib/index.js"
+    "start:dev": "npm run build && node lib/index.js",
+    "postinstall": "tsc && sed -i '1i#!/usr/bin/env node' lib/index.js && chmod +x lib/index.js"
   },
   "dependencies": {
     "config": "^3.3.6",
