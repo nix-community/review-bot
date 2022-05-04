@@ -37,6 +37,39 @@
           default = review-bot;
         };
 
+        nixosModules.review-bot = { config, lib, pkgs, ... }:
+          with lib;
+          let
+            cfg = config.services.nc-review-bot;
+            util = import ./svc-util.nix { inherit lib config; };
+          in {
+            options.services.nc-review-bot = {
+              enable =
+                mkEnableOption "Enables nix-community's review-bot for nixpkgs";
+              secretFolder = mkOption {
+                type = types.str;
+                example = "/run/keys/lbahblah";
+                description =
+                  "path to service secret directory. the file default.yml must be in it";
+              };
+            };
+
+            config = mkIf cfg.enable (mkMerge [
+              (util.mkService "review-bot" {
+                home = cfg.folder;
+                description = "Nix-community nixpkgs-review matrix bot";
+                script = let bin = pkgs.cookie.anonvote-bot;
+                in ''
+                  exec ${bin}/bin/review-bot
+                '';
+              })
+              {
+                systemd.services.review-bot.environment.NODE_CONFIG_DIR =
+                  cfg.secretFolder;
+              }
+            ]);
+          };
+
         defaultPackage = packages.default;
 
         apps = rec {
@@ -49,8 +82,7 @@
 
         defaultApp = apps.default;
 
-        devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [ yarn node y2n.yarn2nix ];
-        };
+        devShell =
+          pkgs.mkShell { buildInputs = with pkgs; [ yarn node y2n.yarn2nix ]; };
       });
 }
