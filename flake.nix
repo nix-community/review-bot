@@ -5,9 +5,11 @@
     nixpkgs.url =
       "github:nixos/nixpkgs/nixos-unstable"; # We want to use packages from the binary cache
     flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs-review.url = "github:Mic92/nixpkgs-review";
+    nixpkgs-review.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nixpkgs, flake-utils, ... }:
+  outputs = inputs@{ self, nixpkgs, flake-utils, nixpkgs-review }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
@@ -18,6 +20,7 @@
           nodejs = node;
           yarn = nyarn;
         };
+        npr = nixpkgs-review.packages.${system}.nixpkgs-review-sandbox;
       in rec {
         packages = rec {
           review-bot = y2n.mkYarnPackage {
@@ -30,7 +33,7 @@
             nativeBuildInputs = with pkgs; [ makeWrapper ];
             postFixup = ''
               wrapProgram $out/bin/review-bot --prefix PATH : ${
-                lib.makeBinPath (with pkgs; [ nixpkgs-review ])
+                lib.makeBinPath [ npr ]
               }
             '';
           };
@@ -83,6 +86,6 @@
         defaultApp = apps.default;
 
         devShell =
-          pkgs.mkShell { buildInputs = with pkgs; [ yarn node y2n.yarn2nix ]; };
+          pkgs.mkShell { buildInputs = with pkgs; [ yarn node y2n.yarn2nix npr ]; };
       });
 }

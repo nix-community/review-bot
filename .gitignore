@@ -69,5 +69,6 @@ typings/
 # next.js build output
 .next
 
-# Nix result
+# Nix
 result
+.direnv
