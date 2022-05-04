@@ -6,6 +6,8 @@ import * as fs from "fs/promises";
 import { join } from "path";
 import { createConnection as connectTcp } from "net";
 
+let runningReviewPromise = Promise.resolve();
+
 export async function runPrCommand(roomId: string, event: MessageEvent<MessageEventContent>, args: string[], client: MatrixClient) {
     const octokit = new Octokit({
         auth: config.githubToken,
@@ -37,14 +39,18 @@ ${prInfoText}`,
         msgtype: "m.notice",
     });
 
-    const builds = prInfo.map(async info => {
-        const output = await runNixpkgsReview(info.number, config.githubToken);
-        const url = await postOnTermbin(output);
-        await client.sendMessage(roomId, {
-            body: `${mention.text}: build of PR ${info.number} done: ${url}`,
-            msgtype: "m.notice"
-        });
-    });
+    await runningReviewPromise;
+
+    runningReviewPromise = (async () => {
+        for (let info of prInfo) {
+            const output = await runNixpkgsReview(info.number, config.githubToken);
+            const url = await postOnTermbin(output);
+            await client.sendMessage(roomId, {
+                body: `${mention.text}: build of PR ${info.number} done: ${url}`,
+                msgtype: "m.notice"
+            });
+        }
+    })();
 }
 
 
