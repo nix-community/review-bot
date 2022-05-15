@@ -1,15 +1,13 @@
 {
-  description = "A very basic flake";
+  description = "Run `nixpkgs-review pr` from Matrix [maintainer=@ckiee]";
 
   inputs = {
     nixpkgs.url =
       "github:nixos/nixpkgs/nixos-unstable"; # We want to use packages from the binary cache
     flake-utils.url = "github:numtide/flake-utils";
-    nixpkgs-review.url = "github:Mic92/nixpkgs-review";
-    nixpkgs-review.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nixpkgs, flake-utils, nixpkgs-review }:
+  outputs = inputs@{ self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
@@ -20,8 +18,7 @@
           nodejs = node;
           yarn = nyarn;
         };
-        npr = nixpkgs-review.packages.${system}.nixpkgs-review-sandbox;
-        runtimeDeps = [ npr pkgs.git ];
+        runtimeDeps = [ pkgs.nixpkgs-review pkgs.bubblewrap pkgs.git ];
       in rec {
         packages = rec {
           review-bot = y2n.mkYarnPackage {
